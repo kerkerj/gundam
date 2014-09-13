@@ -8,7 +8,8 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "/dev/tty.Sphero-ORY-AMP-SPP"
+		// This is my device port, change to yours
+		port = "/dev/tty.Sphero-RGG-AMP-SPP"
 	}
 
 	s := NewSphero("Gundam", port)

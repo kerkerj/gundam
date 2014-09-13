@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot-sphero"
+	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
 func NewSphero(name, port string) Sphero {
-	return &sphero{Name: "Gundam", Port: port}
+	return &sphero_struct{Name: "Gundam", Port: port}
 }
 
 type Sphero interface {
@@ -15,32 +15,36 @@ type Sphero interface {
 	SetRGB(r, g, b uint8)
 }
 
-type sphero struct {
+type sphero_struct struct {
 	Name       string
 	Port       string
-	device     *gobotSphero.SpheroDriver
-	connection *gobotSphero.SpheroAdaptor
+	device     *sphero.SpheroDriver
+	connection *sphero.SpheroAdaptor
 }
 
-func (s *sphero) Start() {
-	s.connection = new(gobotSphero.SpheroAdaptor)
-	s.connection.Name = "sphero"
-	s.connection.Port = s.Port
+func (s *sphero_struct) Start() {
+	gbot := gobot.NewGobot()
 
-	s.device = gobotSphero.NewSphero(s.connection)
-	s.device.Name = s.Name
+	adaptor := sphero.NewSpheroAdaptor("sphero", s.Port)
+	driver := sphero.NewSpheroDriver(adaptor, "sphero")
 
-	robot := gobot.Robot{
-		Connections: []gobot.Connection{s.connection},
-		Devices:     []gobot.Device{s.device},
-	}
-	robot.Start()
+	s.connection = adaptor
+	s.device = driver
+
+	robot := gobot.NewRobot("sphero",
+		[]gobot.Connection{adaptor},
+		[]gobot.Device{driver},
+	)
+
+	gbot.AddRobot(robot)
+
+	gbot.Start()
 }
 
-func (s *sphero) Stop() {
+func (s *sphero_struct) Stop() {
 	s.connection.Disconnect()
 }
 
-func (s *sphero) SetRGB(r, g, b uint8) {
+func (s *sphero_struct) SetRGB(r, g, b uint8) {
 	s.device.SetRGB(r, g, b)
 }
